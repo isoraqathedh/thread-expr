@@ -40,12 +40,12 @@ Ideally used for expressing the flow of data through a set of functions."
   (let (final-gensym
         (last-form (car (last forms)))
         (other-forms (butlast forms)))
-    (flet ((substitute-thread-symbol (gensym thread-sym form)
+    (flet ((substitute-thread-symbol (new-sym thread-sym form)
              (if (listp form)
-                 (substitute gensym thread-sym form)
-                 (list form gensym))))
+                 (substitute new-sym thread-sym form)
+                 (list form new-sym))))
       `(let* ,(loop for form in other-forms
-                    for this-gensym = (gensym)
+                    for this-gensym = (gensym "THRUSH")
                     and prev-gensym = argument then this-gensym
                     collect (list this-gensym
                                   (substitute-thread-symbol
