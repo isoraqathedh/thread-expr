@@ -42,7 +42,7 @@ Ideally used for expressing the flow of data through a set of functions."
         (other-forms (butlast forms)))
     (flet ((substitute-thread-symbol (new-sym thread-sym form)
              (if (listp form)
-                 (substitute new-sym thread-sym form)
+                 (subst new-sym thread-sym form)
                  (list form new-sym))))
       `(let* ,(loop for form in other-forms
                     for this-gensym = (gensym "THRUSH")
