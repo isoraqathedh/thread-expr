@@ -27,13 +27,13 @@ A re-implementation of the identically-named function in Clojure."
                   `(,fun ,arg))) functions
                   :initial-value argument))
 
-(defmacro with-expression-threading ((argument &optional (thread-symbol :||))
+(defmacro with-expression-threading ((&optional (thread-symbol :||))
                                      &body forms)
   "Threads ARGUMENT through FORMS anaphorically.
 
 Each form in FORMS must have one or more of a symbol THREAD-SYMBOL in it.
 Each instance of that symbol is replaced with the form preceding it.
-As a special case, `(foo THREAD-SYMBOL)` can be written simply as `foo`.
+As a special case, `(foo THREAD-SYMBOL)` can be written simply as `#'foo`.
 All forms evaluated once only. Preserves multiple values.
 
 Ideally used for expressing the flow of data through a set of functions."
@@ -41,12 +41,12 @@ Ideally used for expressing the flow of data through a set of functions."
         (last-form (car (last forms)))
         (other-forms (butlast forms)))
     (flet ((substitute-thread-symbol (new-sym thread-sym form)
-             (if (listp form)
-                 (subst new-sym thread-sym form)
-                 (list form new-sym))))
+             (if (and (listp form) (eql (car form) 'function))
+                 (list (cadr form) new-sym)
+                 (subst new-sym thread-sym form))))
       `(let* ,(loop for form in other-forms
                     for this-gensym = (gensym "THRUSH")
-                    and prev-gensym = argument then this-gensym
+                    and prev-gensym = nil then this-gensym
                     collect (list this-gensym
                                   (substitute-thread-symbol
                                    prev-gensym thread-symbol form))
